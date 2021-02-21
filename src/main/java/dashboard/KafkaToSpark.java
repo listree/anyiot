@@ -1,5 +1,6 @@
 package dashboard;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -41,6 +42,8 @@ public final class KafkaToSpark {
       System.exit(1);
     }
 
+    System.out.println("Start KafkaToSpark...");
+
     String zkQuorum = args[0];
     String groupId = args[1];
     String[] topics = args[2].split(",");
@@ -60,15 +63,11 @@ public final class KafkaToSpark {
             KafkaUtils.createStream(jssc, zkQuorum, groupId, topicMap);
 
     JavaDStream<String> lines = messages.map(Tuple2::_2);
-    System.out.println(lines);
+    JavaDStream<Integer> stream = lines.map(string -> Integer.parseInt(string));
 
-//    JavaDStream<Object> words =
-//        lines.flatMap(string -> Arrays.asList(SPACE.split(string)).iterator());
-
-//    JavaPairDStream<String, Integer> wordCounts =
-//      words.mapToPair(s -> new Tuple2<>(s, 1)).reduceByKey((i1, i2) -> i1 + i2);
-
-//    wordCounts.print();
+    JavaDStream<Integer> valueSum  = stream.reduceByWindow(
+            (x, y) -> x + y, (x, y) -> x - y, new Duration(2000), new Duration(1000));
+    valueSum.print();
 
     jssc.start();
     jssc.awaitTermination();

@@ -26,6 +26,8 @@ git clone https://github.com/listree/integrated-iotsystem.git
 
 cd integrated-iotsystem
 
-bin/demoSimpleKafka.sh
+mvn package
 
-bin/demoSparkSubmit.sh
+bin/testKafkaAlert.sh
+
+bin/testSparkProc.sh

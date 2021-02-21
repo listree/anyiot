@@ -36,7 +36,7 @@ public class AlertConsumer {
                 System.out.printf("offset=%d, key=%s, value=%s\n", record.offset(), record.key(), record.value());
                 Integer metric = Integer.parseInt(record.value());
                 if ( metric > 9 ) { // 10% messages will be alerted
-                    System.err.println("!!! Alert !!!: " + metric);
+                    System.err.println("!!! Alert, Alert, Alert !!!: " + metric);
                 }
 
             }
