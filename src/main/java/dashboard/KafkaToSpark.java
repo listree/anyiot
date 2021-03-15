@@ -1,6 +1,5 @@
 package dashboard;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -10,7 +9,6 @@ import scala.Tuple2;
 import org.apache.spark.SparkConf;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
@@ -25,8 +23,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils;
  *   <numThreads> is the number of threads the kafka consumer should use
  *
  * To run this example:
- *   `$ spark-submit SparkDashboard zoo01,zoo02, \
- *    zoo03 my-consumer-group topic1,topic2 1`
+ *   `$ spark-submit localhost:2181 groupA topicA 10`
  */
 
 public final class KafkaToSpark {
@@ -59,14 +56,18 @@ public final class KafkaToSpark {
     for (String topic: topics) {
       topicMap.put(topic, numThreads);
     }
-    JavaPairReceiverInputDStream<String, String> messages =
-            KafkaUtils.createStream(jssc, zkQuorum, groupId, topicMap);
+    
+    JavaPairReceiverInputDStream<String, String> messages = KafkaUtils.createStream(jssc, zkQuorum, groupId, topicMap);
 
     JavaDStream<String> lines = messages.map(Tuple2::_2);
     JavaDStream<Integer> stream = lines.map(string -> Integer.parseInt(string));
 
     JavaDStream<Integer> valueSum  = stream.reduceByWindow(
-            (x, y) -> x + y, (x, y) -> x - y, new Duration(2000), new Duration(1000));
+            (x, y) -> x + y, 
+            (x, y) -> x - y, 
+            new Duration(2000), 
+            new Duration(1000)
+    );
     valueSum.print();
 
     jssc.start();
