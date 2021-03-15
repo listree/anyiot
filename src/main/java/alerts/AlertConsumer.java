@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 public class AlertConsumer {
 
@@ -16,15 +17,15 @@ public class AlertConsumer {
 
         //Kafka consumer configuration settings
         String topicName = args[0];
-        Properties props = new Properties();
+        Properties props = getProperties();
         props.put("bootstrap.servers", "localhost:9092");
-        props.put("group.id", "test");
+        props.put("group.id", "groupA");
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        org.apache.kafka.clients.consumer.KafkaConsumer<String, String> consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<String, String>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
 
         //Kafka Consumer subscribes list of topics here.
         consumer.subscribe(Arrays.asList(topicName));
@@ -41,6 +42,19 @@ public class AlertConsumer {
 
             }
         }
+
+    }
+
+    private static Properties getProperties() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092");
+        props.put("group.id", "groupA");
+        props.put("enable.auto.commit", "true");
+        props.put("auto.commit.interval.ms", "1000");
+        props.put("session.timeout.ms", "30000");
+        props.put("key.serializer", StringSerializer.class.getCanonicalName());
+        props.put("value.serializer", StringSerializer.class.getCanonicalName());
+        return props;
     }
 
 }
